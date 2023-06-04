@@ -3,6 +3,7 @@ import { getMovie, searchIdMovie } from "./services/film.services";
 
 function App() {
   const [movie, setMovie] = useState([]);
+  const [detailMovie, getDetailMovie] = useState({});
   // landing page
   useEffect(() => {
     getMovie("superman", (data) => {
@@ -13,15 +14,25 @@ function App() {
   function searchHandler(e) {
     e.preventDefault();
     const search = e.target.search.value;
-    getMovie(search, (data) => {
-      setMovie(data);
-    });
+    if (search.length > 3) {
+      getMovie(search, (data) => {
+        setMovie(data);
+      });
+    }
   }
   //
-  function fullViewHandler() {
-    searchIdMovie("tt1285016", (data) => {
-      console.log(data);
+  const cardDetailRef = useRef(null);
+  // console.log(cardDetailRef.current.classList)
+  function fullViewHandler(e) {
+    searchIdMovie(e.target.id, (data) => {
+      getDetailMovie(data);
+      cardDetailRef.current.classList.remove('hidden')
+      cardDetailRef.current.classList.add('flex')
     });
+  }
+  function detailHidden() {
+    cardDetailRef.current.classList.add('hidden')
+    cardDetailRef.current.classList.remove('flex')
   }
   return (
     <section
@@ -59,10 +70,12 @@ function App() {
             </button>
           </form>
         </div>
-        {movie.length == 0 && <div className="text-center flex flex-col justify-center items-center">
-          <h2 className="text-white py-12 font-bold">LOADING</h2>
-          <div className="px-4 py-4 w-16 h-16 rounded-full bg-white animate-bounce "></div> 
-          </div>}
+        {movie.length == 0 && (
+          <div className="text-center flex flex-col justify-center items-center">
+            <h2 className="text-white py-12 font-bold">LOADING</h2>
+            <div className="px-4 py-4 w-16 h-16 rounded-full bg-white animate-bounce "></div>
+          </div>
+        )}
         <div className=" flex flex-wrap justify-center pt-12 px-4 gap-3">
           {movie.length > 0 &&
             movie.map((i) => {
@@ -85,6 +98,7 @@ function App() {
                     </p>
                     <button
                       id={i.imdbID}
+                      onClick={(e) => fullViewHandler(e)}
                       className="px-4 py-2 bg-slate-700 text-white font-bold rounded-lg mt-2 hover:bg-slate-500"
                     >
                       full
@@ -95,30 +109,35 @@ function App() {
             })}
         </div>
         {/* tampil data */}
-        {/* <div className="absolute bg-slate-100 w-full max-w-2xl px-4 py-2 top-0 left-1/2 -translate-x-1/2 z-50 rounded-lg shadow-lg flex ">
+        <div
+          ref={cardDetailRef}
+          key={detailMovie.imdbID}
+          className=" hidden fixed bg-slate-100 w-full max-w-2xl flex-col items-center lg:flex-row lg:max-w-4xl px-4 py-2 top-5 lg:top-1/4 left-1/2 -translate-x-1/2  z-50 rounded-lg shadow-lg lg:mx-0 "
+        >
           <img
-            src=""
-            alt=""
+            src={detailMovie.Poster}
+            alt="poster"
             className="bg-black w-64 h-96 rounded-lg shadow-lg"
           />
           <div className="px-4 py-2 w-full flex flex-col justify-around">
-            <h2 className="font-bold text-xl ">judul</h2>
-            <p>genre</p>
-            <p>bahasa</p>
-            <p>relis & runtime</p>
-            <p>director</p>
-            <p>writer</p>
+            <h2 className="font-bold text-xl ">{detailMovie.Title}</h2>
+            <p>Genre : {detailMovie.Genre}</p>
+            <p>Language : {detailMovie.Language}</p>
             <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Placeat
-              vitae necessitatibus consequatur voluptas ducimus quod incidunt
-              aperiam, libero animi recusandae.
+              Released : {detailMovie.Released} & Runtime {detailMovie.Runtime}
             </p>
-            <button className="fixed right-0 top-0 text-xl bg-slate-300 px-2 rounded-full">
+            <p>Actors : {detailMovie.Actors}</p>
+            <p>Writer : {detailMovie.Writer}</p>
+            <p>Plot : {detailMovie.Plot}</p>
+            <button
+              onClick={() => detailHidden()}
+              className="fixed right-0 top-0 text-xl bg-slate-300 px-2 rounded-full"
+            >
               X
             </button>
           </div>
-        </div> */}
-        {/*  */}
+        </div>
+        ;{/*  */}
       </div>
     </section>
   );
